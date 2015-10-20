@@ -13,21 +13,23 @@ best <- function(state, outcome) {
   validOutcome <- c("heart attack", "heart failure", "pneumonia")
   if(match(outcome, validOutcome, nomatch=-1) == -1){
   stop ("invalid outcome")
+    else if(outcome == "heart attack"){
+      mortDataCol <- 11
+    }
+    else if(outcome == "heart failure"){
+      mortDataCol <- 17
+    }
+    else ## Pneumonia
+      mortDataCol <-23
   }
   
   ## Return hospital name in that state with lowest 30-day death
   ## rate
-  statesubset <- outcome.DF[outcome.DF$State == state, ]
-  if(outcome == "heart attack"){
-    stateInOrder <-statesubset[order(statesubset$Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack, na.last = TRUE, decreasing = FALSE),]
-  }
-  else if(outcome == "heart failure"){
-    stateInOrder <-statesubset[order(statesubset$Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure, na.last = TRUE, decreasing = FALSE),]
-  }
-  else if(outcome == "pneumonia"){
-    stateInOrder <-statesubset[order(statesubset$Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia, na.last = TRUE, decreasing = FALSE),]
-  }
-  stateInOrder[1,2] 
+  stateLoc <- 7
+  stateOutcomeUnordered <- outcome.DF[outcome.DF[,stateLoc] == state & outcome.DF[,mortDataCol]!="Not Available", ]
+  stateOutcomeOrdered <- stateOutcomeUnordered[order(stateOutcomeUnordered[,mortDataCol], decreasing = FALSE), ]
+  
+  stateOutcomeOrdered[1,2] 
   ## [,11] = heart attack mortality rate
   ## [,17] = heart failure mortality rate
   ## [,23] = pneumonia mortality rate
