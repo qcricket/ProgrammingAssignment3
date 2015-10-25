@@ -103,3 +103,4 @@ rankall <- function(outcome, num = "best") {
     
   ## For each state, find the hospital of the given rank
   answer
+}
