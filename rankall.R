@@ -17,48 +17,40 @@ rankall <- function(outcome, num = "best") {
   ## Rename columns in new data frame
   names(df)[1:5] <- c("Name","State","HA","HF","PN")
   
-  ## Initialize final output data frame
-  answer <- data.frame(matrix(nrow = 0, ncol = 2))
-  colnames(answer) <- c("hospital", "state")
-  
-  ## Discard Not Available observations & re-order based on condition & hospital name
-  
-  ## Case 1 = Heart Attack
   if(outcome=="heart attack"){
-    df <- df[df$HA != "Not Available", ]    
-    ## Rank in ascending order by mortality rate
-    df.Ordered <- lapply(x, function(x) x[order(x$HA, x$Name), ])
+    colID <- "HA"
   }
-  
-  ## Case 2 = Heart Failure
   else if(outcome=="heart failure"){
-    df <- df[df$HF != "Not Available", ]    
-    ## Rank in ascending order by mortality rate
-    df.Ordered <- lapply(x, function(x) x[order(x$HF, x$Name), ])
-  }
-  
-  ## Case 3 = Pneumonia
-  else ## (outcome=="pneumonia"){
-    df <- df[df$PN != "Not Available", ]    
-  ## Rank in ascending order by mortality rate
-  df.Ordered <- lapply(x, function(x) x[order(x$PN, x$Name), ])
-  
-  ## Generate output data frame    
-  if(num=="best"){
-    for(i in 1:54){
-      answer <- rbind(c(df.Ordered[[i]]$Name[1], df.Ordered[[i]]$State[1]))
-    }
-  }
-  else if(num =="worst"){
-    for(i in 1:54){
-      answer <- rbind(c(df.Ordered[[i]]$Name[nrow(df.Ordered[[i]])], df.Ordered[[i]]$State[nrow(df.Ordered[[i]])]))
-    }
+    colID <- "HF"
   }
   else 
-    for(i in 1:54){
-      answer <- rbind(c(df.Ordered[[i]]$Name[nrow(df.Ordered[[i]])], df.Ordered[[i]]$State[nrow(df.Ordered[[i]])]))
-    }
+    colID <- "PN"
   
-  ## For each state, find the hospital of the given rank
+  ## Initialize final output data frame
+  stateList <- sort(unique(df$State))
+  answer <- data.frame(matrix(nrow = length(stateList), ncol = 2))
+  colnames(answer) <- c("hospital", "state")
+  rownames(answer) <- stateList
+
+  ## Ignore Not Available observations & re-order based on condition & hospital
+  ## name
+  
+  for(i in seq_along(stateList)){
+    ## Examine each state's set of observations
+    df.State <- df[df$State==stateList[i], ]
+    
+    ## Order that state's observations
+    df.State.Ordered <- df.State[order(as.numeric(df.State[[colID]]), df.State[["Name"]], na.last = NA) ,]
+  
+    ## Assign observation with desired rank to data frame
+    if(num=="best")
+      index <-1
+    else if(num=="worst")
+      index <- nrow(df.State.Ordered)
+    else
+      index <- num
+      answer[i, ] <- c(df.State.Ordered$Name[index], 
+                     df.State.Ordered[[colID]][index])
+  }
   answer
 }
