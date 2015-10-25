@@ -50,7 +50,7 @@ rankall <- function(outcome, num = "best") {
     else
       index <- num
       answer[i, ] <- c(df.State.Ordered$Name[index], 
-                     df.State.Ordered[[colID]][index])
+                     stateList[i])
   }
   answer
 }
